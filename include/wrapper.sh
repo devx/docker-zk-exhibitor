@@ -92,4 +92,4 @@ exec 2>&1
   ${BACKUP_CONFIG} \
   ${HTTP_PROXY} \
   --hostname ${HOSTNAME} \
-  ${SECURITY}
+  ${SECURITY} &>1
