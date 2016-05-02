@@ -18,12 +18,13 @@ HTTP_PROXY=""
 : ${HTTP_PROXY_PORT:=""}
 : ${HTTP_PROXY_USERNAME:=""}
 : ${HTTP_PROXY_PASSWORD:=""}
+: ${SERVO_ENABLED:="false"}
 
 cat <<- EOF > /opt/exhibitor/defaults.conf
-	zookeeper-data-directory=$ZK_DATA_DIR
+	zookeeper-data-directory=${ZK_DATA_DIR}
 	zookeeper-install-directory=/opt/zookeeper
-	zookeeper-log-directory=$ZK_LOG_DIR
-	log-index-directory=$ZK_LOG_DIR
+	zookeeper-log-directory=${ZK_LOG_DIR}
+	log-index-directory=${ZK_LOG_DIR}
 	cleanup-period-ms=300000
 	check-ms=30000
 	backup-period-ms=600000
@@ -36,7 +37,7 @@ cat <<- EOF > /opt/exhibitor/defaults.conf
 	zoo-cfg-extra=tickTime\=2000&initLimit\=10&syncLimit\=5&quorumListenOnAllIPs\=true
 	auto-manage-instances-settling-period-ms=0
 	auto-manage-instances=1
-	auto-manage-instances-fixed-ensemble-size=$ZK_ENSEMBLE_SIZE
+	auto-manage-instances-fixed-ensemble-size=${ZK_ENSEMBLE_SIZE}
 EOF
 
 
@@ -62,7 +63,7 @@ if [[ -n ${ZK_PASSWORD} ]]; then
 fi
 
 
-if [[ -n $HTTP_PROXY_HOST ]]; then
+if [[ -n ${HTTP_PROXY_HOST} ]]; then
     cat <<- EOF > /opt/exhibitor/proxy.properties
       com.netflix.exhibitor.s3.proxy-host=${HTTP_PROXY_HOST}
       com.netflix.exhibitor.s3.proxy-port=${HTTP_PROXY_PORT}
@@ -73,6 +74,10 @@ EOF
     HTTP_PROXY="--s3proxy=/opt/exhibitor/proxy.properties"
 fi
 
+if [[ -n ${SERVO_ENABLED} ]]; then
+
+    SERVO="--servo ${SERVO_ENABLED}"
+fi
 
 exec 2>&1
 
@@ -87,4 +92,4 @@ exec 2>&1
 # 	--s3credentials /opt/exhibitor/credentials.properties \
 # 	--s3region us-west-2 --s3backup true
 
-java -jar /opt/exhibitor/exhibitor.jar --port 8181 --defaultconfig /opt/exhibitor/defaults.conf ${BACKUP_CONFIG} ${HTTP_PROXY} --hostname ${HOSTNAME} ${SECURITY}
+java -jar /opt/exhibitor/exhibitor.jar --port 8181 --defaultconfig /opt/exhibitor/defaults.conf ${BACKUP_CONFIG} ${HTTP_PROXY} ${SERVO} --hostname ${HOSTNAME} ${SECURITY}
