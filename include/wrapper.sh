@@ -79,6 +79,13 @@ if [[ -n ${SERVO_ENABLED} ]]; then
     SERVO="--servo ${SERVO_ENABLED}"
 fi
 
+if [[ -n ${ZK_JVM_FLAGS} ]]; then
+cat <<- EOF > /opt/zookeeper/conf/java.env
+      export JVMFLAGS="${ZK_JVM_FLAGS}"
+EOF
+
+fi
+
 exec 2>&1
 
 # If we use exec and this is the docker entrypoint, Exhibitor fails to kill the ZK process on restart.
